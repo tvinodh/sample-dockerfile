@@ -10,7 +10,7 @@ jobs:
 
   build:
 
-    runs-on: Amazonlinux-latest
+    runs-on: ubantu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -38,7 +38,7 @@ jobs:
         
   Deploy:
     needs: build
-    runs-on: AmazonLinux-latest
+    runs-on: ubantu-latest
     
     steps:
       - uses: actions/checkout@v2 
