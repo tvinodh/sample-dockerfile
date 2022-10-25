@@ -10,7 +10,7 @@ jobs:
 
   build:
 
-    runs-on: Amazon linux-latest
+    runs-on: Amazonlinux-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -38,7 +38,7 @@ jobs:
         
   Deploy:
     needs: build
-    runs-on: Amazon Linux-latest
+    runs-on: AmazonLinux-latest
     
     steps:
       - uses: actions/checkout@v2 
