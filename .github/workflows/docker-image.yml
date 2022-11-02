@@ -48,6 +48,6 @@ jobs:
           username: ec2-user
           key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
           envs: GITHUB_SHA
-          script: |
+          run: |
             docker login
             docker pull $IMAGE_TAG
