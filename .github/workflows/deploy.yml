@@ -1,0 +1,34 @@
+ 
+  Deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.TF_USER_AWS_KEY }}
+        aws-secret-access-key: ${{ secrets.TF_USER_AWS_SECRET }}
+        aws-region: us-east-1
+        
+    - uses: appleboy/ssh-action@master    
+    - name: Docker pull & run from github
+      with:
+          host: ec2-100-26-191-30.compute-1.amazonaws.com
+          username: ec2-user
+          key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
+          envs: GITHUB_SHA
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: githubactions
+          IMAGE_TAG: githubactions_image
+          
+          script: |
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+#            docker run  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
