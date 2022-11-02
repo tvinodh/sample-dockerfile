@@ -1,6 +1,14 @@
- 
+name: Docker Image CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
   Deploy:
-    needs: build
+   
     runs-on: ubuntu-latest
     
     steps:
