@@ -41,13 +41,13 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: appleboy/ssh-action@master    
-    - name: Docker pull & run from github
+    - name: Docker pull & run from github    
+    - uses: appleboy/ssh-action@master
       with:
-          host: ec2-100-26-191-30.compute-1.amazonaws.com
-          username: ec2-user
-          key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
-          envs: GITHUB_SHA
-          run: |
-            docker login
-            docker pull $IMAGE_TAG
+        host: ec2-100-26-191-30.compute-1.amazonaws.com
+        username: ec2-user
+        key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
+        envs: GITHUB_SHA
+        run: |
+          docker login
+          docker pull $IMAGE_TAG
