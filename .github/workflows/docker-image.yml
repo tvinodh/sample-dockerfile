@@ -24,10 +24,12 @@ jobs:
         aws-region: us-east-1
 
     - name: Login to Amazon ECR
+    uses:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
     - name: Build, tag, and push image to Amazon ECR
+    uses:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: githubactions
@@ -42,6 +44,7 @@ jobs:
 
     steps:
       - name: Docker pull & run from github
+      uses:
         uses: appleboy/ssh-action@master
         with:
           host: ec2-100-26-191-30.compute-1.amazonaws.com
