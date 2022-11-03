@@ -40,11 +40,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          aws-region: us-east-1
+
       - name: Docker pull & run from github
         uses: appleboy/ssh-action@master
         with:
@@ -53,5 +49,7 @@ jobs:
           key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
           envs: GITHUB_SHA
           script: |
-            docker login
-            docker pull githubactions_image 
+            df -f
+            pwd
+#           docker login
+ #           docker pull githubactions_image 
