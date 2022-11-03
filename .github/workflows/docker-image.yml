@@ -43,7 +43,7 @@ jobs:
         envs: GITHUB_SHA
         script: |
             docker login 
-            docker pull githubactions_image
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
 #  Deploy:
 #   needs: build
