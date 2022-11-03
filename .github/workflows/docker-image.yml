@@ -48,4 +48,4 @@ jobs:
           key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
           envs: GITHUB_SHA
           script: |
-            docker pull $IMAGE_TAG 
+            docker pull githubactions_image 
