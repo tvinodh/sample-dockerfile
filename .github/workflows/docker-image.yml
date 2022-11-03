@@ -42,7 +42,7 @@ jobs:
         key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
         envs: GITHUB_SHA
         script: |
-            docker pull $ECR_REPOSITORY:$IMAGE_TAG
+            docker pull ${ECR_REPOSITORY}:${IMAGE_TAG}
 
 #  Deploy:
 #   needs: build
