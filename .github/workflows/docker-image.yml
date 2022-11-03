@@ -49,7 +49,9 @@ jobs:
           key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
           envs: GITHUB_SHA
           script: |
-            df -f
+            df -h
+            hostname
+            ls -ltrh
             pwd
 #           docker login
  #           docker pull githubactions_image 
