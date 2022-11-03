@@ -42,7 +42,6 @@ jobs:
         key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
         envs: GITHUB_SHA
         script: |
-            docker login $ECR_REGISTRY
             docker pull $ECR_REPOSITORY:$IMAGE_TAG
 
 #  Deploy:
