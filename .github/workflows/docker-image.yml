@@ -34,21 +34,21 @@ jobs:
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    - name: Docker pull & run from github
+      uses: appleboy/ssh-action@master
+      with:
+        host: ec2-3-86-102-151.compute-1.amazonaws.com
+        username: ec2-user
+        key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
+        envs: GITHUB_SHA
+        script: |
+            docker login 
+            docker pull $IMAGE_TAG
 
-  Deploy:
-    needs: build
-    runs-on: ubuntu-latest
+#  Deploy:
+#   needs: build
+#    runs-on: ubuntu-latest
 
-    steps:
+ #   steps:
 
-      - name: Docker pull & run from github
-        uses: appleboy/ssh-action@master
-        with:
-          host: ec2-3-86-102-151.compute-1.amazonaws.com
-          username: ec2-user
-          key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
-          envs: GITHUB_SHA
-          script: |
-            docker login
-#           docker pull githubactions_image 
-            docker pull --all-tags fedora
+  
