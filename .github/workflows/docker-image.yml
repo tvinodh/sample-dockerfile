@@ -47,9 +47,10 @@ jobs:
           ls -ltrha
           export ECR_REGISTRY="788866596473.dkr.ecr.us-east-1.amazonaws.com"
           export ECR_REPOSITORY="githubactions"
+          export IMAGE_TAG="githubactions_image"
           echo $ECR_REGISTRY
           echo $ECR_REPOSITORY
-          echo "docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:latest"
+          docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:IMAGE_TAG
 
 #  Deploy:
 #   needs: build
