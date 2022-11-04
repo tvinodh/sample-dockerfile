@@ -49,8 +49,7 @@ jobs:
           export ECR_REPOSITORY="githubactions"
           echo $ECR_REGISTRY
           echo $ECR_REPOSITORY
-          echo "docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ."
-#            docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
 #  Deploy:
 #   needs: build
