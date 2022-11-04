@@ -45,6 +45,7 @@ jobs:
           pwd
           ls -ltrha
           echo "docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ."
+          aws ecr describe-repositories
 #            docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
 #  Deploy:
