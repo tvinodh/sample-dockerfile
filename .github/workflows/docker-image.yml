@@ -40,12 +40,6 @@ jobs:
         host: ec2-3-86-102-151.compute-1.amazonaws.com
         username: ec2-user
         key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
-        aws-access-key-id: ${{ secrets.TF_USER_AWS_KEY }}
-        aws-secret-access-key: ${{ secrets.TF_USER_AWS_SECRET }}
-        aws-region: us-east-1
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: githubactions
-        IMAGE_TAG: githubactions_image
         envs: GITHUB_SHA
         script: |
           pwd
