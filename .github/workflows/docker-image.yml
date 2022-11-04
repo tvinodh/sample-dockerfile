@@ -40,13 +40,14 @@ jobs:
         host: ec2-3-86-102-151.compute-1.amazonaws.com
         username: ec2-user
         key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
+        aws-access-key-id: ${{ secrets.TF_USER_AWS_KEY }}
+        aws-secret-access-key: ${{ secrets.TF_USER_AWS_SECRET }}
+        aws-region: us-east-1
         envs: GITHUB_SHA
         script: |
           pwd
           ls -ltrha
-          export ECR_REGISTRY = arn:aws:ecr:us-east-1:788866596473:repository
-          echo $ECR_REGISTRY
-#docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 #          echo "docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ."
 #            docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
