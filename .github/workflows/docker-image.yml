@@ -49,7 +49,7 @@ jobs:
           export ECR_REPOSITORY="githubactions"
           echo $ECR_REGISTRY
           echo $ECR_REPOSITORY
-          docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
 #  Deploy:
 #   needs: build
