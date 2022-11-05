@@ -52,13 +52,30 @@ jobs:
           aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
           docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           
-    - name: Manua Approval          
+    - name: Manual Approval          
       uses: trstringer/manual-approval@v1
       with:
         secret: ${{ github.TOKEN }}
         approvers: tvinodh
         minimum-approvals: 1
-        issue-title: "Deploying v1.3.5 to stage from Dev"    
+        issue-title: "Deploying v1.3.5 to stage from Dev" 
+        
+    - name: Deploying to stage based on approvals
+      uses: appleboy/ssh-action@master
+      with:
+        host: ec2-54-242-100-48.compute-1.amazonaws.com
+        username: ec2-user
+        key: ${{ secrets.ACTIONS_STAGE_PRIVATE_KEY }}
+        envs: GITHUB_SHA
+        script: |
+          export ECR_REGISTRY="788866596473.dkr.ecr.us-east-1.amazonaws.com"
+          export ECR_REPOSITORY="githubactions"
+          export IMAGE_TAG="githubactions_image"
+          echo $ECR_REGISTRY
+          echo $ECR_REPOSITORY
+          echo $IMAGE_TAG
+          aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
+          docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
 #  Deploy:
 #   needs: build
