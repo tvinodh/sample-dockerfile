@@ -67,10 +67,8 @@ jobs:
         username: ec2-user
         key: ${{ secrets.ACTIONS_STAGE_PRIVATE_KEY }}
         envs: GITHUB_SHA
-        aws-access-key-id: ${{ secrets.TF_USER_AWS_KEY }}
-        aws-secret-access-key: ${{ secrets.TF_USER_AWS_SECRET }}
-        aws-region: us-east-1
-        script: |
+        
+        run: |
           export ECR_REGISTRY="788866596473.dkr.ecr.us-east-1.amazonaws.com"
           export ECR_REPOSITORY="githubactions"
           export IMAGE_TAG="githubactions_image"
@@ -80,6 +78,7 @@ jobs:
           sudo yum install docker -y
           sudo systemctl start docker
           sudo systemctl enable docker
+          sudo chmod 777 /var/run/docker.sock
           aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
           docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
