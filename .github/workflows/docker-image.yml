@@ -68,7 +68,7 @@ jobs:
         key: ${{ secrets.ACTIONS_STAGE_PRIVATE_KEY }}
         envs: GITHUB_SHA
         
-        run: |
+        script: |
           export ECR_REGISTRY="788866596473.dkr.ecr.us-east-1.amazonaws.com"
           export ECR_REPOSITORY="githubactions"
           export IMAGE_TAG="githubactions_image"
