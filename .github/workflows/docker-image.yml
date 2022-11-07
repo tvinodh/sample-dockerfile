@@ -48,6 +48,7 @@ jobs:
           echo $ECR_REGISTRY
           echo $ECR_REPOSITORY
           echo $IMAGE_TAG
+          sudo chmod 777 /var/run/docker.sock
           aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
           docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           
