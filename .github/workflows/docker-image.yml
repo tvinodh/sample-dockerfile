@@ -43,7 +43,7 @@ jobs:
     - name: Docker pull & run from github
       uses: appleboy/ssh-action@master
       with:
-        host: 44.202.9.170
+        host: ec2-44-203-86-102.compute-1.amazonaws.com
         username: ec2-user
         key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
         envs: GITHUB_SHA
@@ -54,7 +54,7 @@ jobs:
           echo $ECR_REGISTRY
           echo $ECR_REPOSITORY
           echo $IMAGE_TAG
-          sudo chmod 777 /var/run/docker.sock
+          sudo chmod 666 /var/run/docker.sock
           aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
           docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker run -d $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -64,14 +64,14 @@ jobs:
       uses: trstringer/manual-approval@v1
       with:
         secret: ${{ github.TOKEN }}
-        approvers: tvinodh
+ #       approvers: tvinodh
         minimum-approvals: 1
         issue-title: "Deploying v1.3.5 to stage from Dev" 
         
     - name: Deploying to stage based on approvals
       uses: appleboy/ssh-action@master
       with:
-        host: 34.229.84.33
+        host: ec2-54-82-30-100.compute-1.amazonaws.com
         username: ec2-user
         key: ${{ secrets.ACTIONS_STAGE_PRIVATE_KEY }}
         envs: GITHUB_SHA
@@ -86,7 +86,7 @@ jobs:
           sudo yum install docker -y
           sudo systemctl start docker
           sudo systemctl enable docker
-          sudo chmod 777 /var/run/docker.sock
+          sudo chmod 666 /var/run/docker.sock
           aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
           docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
