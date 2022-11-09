@@ -35,7 +35,7 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         
-  DeployStage:
+  DeployDev:
     needs: build
     runs-on: ubuntu-latest
     
@@ -66,8 +66,13 @@ jobs:
         secret: ${{ github.TOKEN }}
         approvers: tvinodh
         minimum-approvals: 1
-        issue-title: "Deploying v1.3.5 to stage from Dev" 
+        issue-title: "Deploying v1.3.5 to stage from Dev"
         
+  DeployStage:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
     - name: Deploying to stage based on approvals
       uses: appleboy/ssh-action@master
       with:
