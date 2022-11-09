@@ -60,19 +60,15 @@ jobs:
           docker run -d $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           
           
-    - name: Manual Approval          
-      uses: trstringer/manual-approval@v1
-      with:
-        secret: ${{ github.TOKEN }}
-        approvers: tvinodh
-        minimum-approvals: 1
-        issue-title: "Deploying v1.3.5 to stage from Dev"
-        
-  DeployStage:
-    needs: build
-    runs-on: ubuntu-latest
-    
-    steps:
+ #   - name: Manual Approval          
+ #     uses: trstringer/manual-approval@v1
+ #     with:
+ #       secret: ${{ github.TOKEN }}
+ #       approvers: tvinodh
+ #       minimum-approvals: 1
+ #       issue-title: "Deploying v1.3.5 to stage from Dev"
+    environment:
+    - name: stage
     - name: Deploying to stage based on approvals
       uses: appleboy/ssh-action@master
       with:
