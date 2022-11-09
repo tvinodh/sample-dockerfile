@@ -43,7 +43,7 @@ jobs:
     - name: Docker pull & run from github
       uses: appleboy/ssh-action@master
       with:
-        host: ec2-44-203-86-102.compute-1.amazonaws.com
+        host: ec2-54-80-76-105.compute-1.amazonaws.com
         username: ec2-user
         key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
         envs: GITHUB_SHA
@@ -71,7 +71,7 @@ jobs:
     - name: Deploying to stage based on approvals
       uses: appleboy/ssh-action@master
       with:
-        host: ec2-54-82-30-100.compute-1.amazonaws.com
+        host: ec2-3-93-66-79.compute-1.amazonaws.com
         username: ec2-user
         key: ${{ secrets.ACTIONS_STAGE_PRIVATE_KEY }}
         envs: GITHUB_SHA
