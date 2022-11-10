@@ -35,9 +35,10 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         
-  DeployDev:
+  Deploy:
     needs: build
     runs-on: ubuntu-latest
+    environment: Deploy
     
     steps:
     - name: Docker pull & run from github
@@ -58,18 +59,17 @@ jobs:
           aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
           docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker run -d $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-  DeployStage:
-    needs: build
-    runs-on: ubuntu-latest
-    
-    environment: 
-      name:productin
+          
+  Stage:
 
+    runs-on: ubuntu-latest 
+    environment: Stage
+    needs: Deploy
 
     steps:
-       - uses: actions/checkout@v3  
-     # name: production
-    #  uses: appleboy/ssh-action@master
+    - uses: actions/checkout@v3  
+      name: production
+ #   - uses: appleboy/ssh-action@master
       
       with:
         host: ec2-3-93-66-79.compute-1.amazonaws.com
