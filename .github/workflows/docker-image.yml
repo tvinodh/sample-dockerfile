@@ -58,19 +58,19 @@ jobs:
           aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
           docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker run -d $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          
-          
- #   - name: Manual Approval          
- #     uses: trstringer/manual-approval@v1
- #     with:
- #       secret: ${{ github.TOKEN }}
- #       approvers: tvinodh
- #       minimum-approvals: 1
- #       issue-title: "Deploying v1.3.5 to stage from Dev"
-    environment:
-    - name: stage
-    - name: Deploying to stage based on approvals
-      uses: appleboy/ssh-action@master
+  DeployStage:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    environment: 
+      name:productin
+
+
+    steps:
+       - uses: actions/checkout@v3  
+     # name: production
+    #  uses: appleboy/ssh-action@master
+      
       with:
         host: ec2-3-93-66-79.compute-1.amazonaws.com
         username: ec2-user
