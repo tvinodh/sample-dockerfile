@@ -35,58 +35,10 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         
-  Deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: Deploy
-    
-    steps:
-    - name: Docker pull & run from github
-      uses: appleboy/ssh-action@master
-      with:
-        host: ec2-54-80-76-105.compute-1.amazonaws.com
-        username: ec2-user
-        key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
-        envs: GITHUB_SHA
-        script: |
-          export ECR_REGISTRY="788866596473.dkr.ecr.us-east-1.amazonaws.com"
-          export ECR_REPOSITORY="githubactions"
-          export IMAGE_TAG="githubactions_image"
-          echo $ECR_REGISTRY
-          echo $ECR_REPOSITORY
-          echo $IMAGE_TAG
-          sudo chmod 666 /var/run/docker.sock
-          aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
-          docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker run -d $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          
-  Stage:
-
-    runs-on: ubuntu-latest 
-    environment: Stage
-    needs: Deploy
-
-    steps:
-    - uses: actions/checkout@v3  
-      name: production
- #   - uses: appleboy/ssh-action@master
-      
-      with:
-        host: ec2-3-93-66-79.compute-1.amazonaws.com
-        username: ec2-user
-        key: ${{ secrets.ACTIONS_STAGE_PRIVATE_KEY }}
-        envs: GITHUB_SHA
+    - name: update kube config
+      run: eksctl update-config --name test-githubactions --region us-east-1
+     
+    - name: Deploy to EKS
+      run: |
+       kubectl apply githubactions-deployment.yml
         
-        script: |
-          export ECR_REGISTRY="788866596473.dkr.ecr.us-east-1.amazonaws.com"
-          export ECR_REPOSITORY="githubactions"
-          export IMAGE_TAG="githubactions_image"
-          echo $ECR_REGISTRY
-          echo $ECR_REPOSITORY
-          echo $IMAGE_TAG
-          sudo yum install docker -y
-          sudo systemctl start docker
-          sudo systemctl enable docker
-          sudo chmod 666 /var/run/docker.sock
-          aws ecr get-login-password | docker login --username AWS --password-stdin  788866596473.dkr.ecr.us-east-1.amazonaws.com
-          docker pull  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
