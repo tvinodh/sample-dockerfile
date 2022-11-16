@@ -5,7 +5,7 @@ metadata:
   labels:
     app: githubaction
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: githubaction
@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: githubaction
-        image: 788866596473.dkr.ecr.us-east-1.amazonaws.com/githubactions
+        image: 788866596473.dkr.ecr.us-east-1.amazonaws.com/githubactions:latest
         ports:
         - containerPort: 80
