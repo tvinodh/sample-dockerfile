@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: githubaction
-        image: 788866596473.dkr.ecr.us-east-1.amazonaws.com/githubactions:latest
+        image: 788866596473.dkr.ecr.us-east-1.amazonaws.com/githubactions:eks_githubactions
         ports:
         - containerPort: 80
