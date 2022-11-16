@@ -37,3 +37,9 @@ jobs:
       run : |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        
+    - name: update kube config
+      run: aws eks update-kubeconfig --name test-githubactions --region us-east-1
+      
+    - name: Deploy to EKS
+      run: kubectl apply -f githubactions.yml
