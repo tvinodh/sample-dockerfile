@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3   
     
     - name: install kubectl
-      uses: azure/setup-kubectl@v3
+      uses: azure/setup-kubectl@v3 //this is the action used for installing the kubectl command
       id: install
       
     - name: Configure AWS credentials
