@@ -1,0 +1,45 @@
+name: Create Clients
+on:
+  workflow_dispatch:
+    inputs:
+      client_name:
+        description: Enter Client Name
+        required: true
+        type: string
+      environment:
+        description: Select environment
+        type: choice
+        required: true
+        options:
+          - dev
+          - staging
+          - prod
+      destroy:
+        description: Destroy Environment
+        type: boolean
+        required: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: DEV
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.ACCESS_SECRET }}
+      AWS_DEFAULT_REGION: 'ap-southeast-1'
+      AWS_DEFAULT_OUTPUT: json
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Terraform
+        env:
+          TF_VAR_customer_name: ${{ inputs.client_name }}
+          TF_VAR_environment: ${{ inputs.environment }}
+        run: |
+          terraform --version
+          terraform init --upgrade
+          
+          terraform workspace select ${{inputs.client_name}}-${{inputs.environment}} || terraform workspace new ${{inputs.client_name}}-${{inputs.environment}}
+          terraform plan
+          terraform apply -auto-approve
+#          terraform apply -destroy -auto-approve
+
+        working-directory: ./client
