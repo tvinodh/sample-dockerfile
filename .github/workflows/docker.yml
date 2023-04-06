@@ -40,6 +40,6 @@ jobs:
           terraform workspace select ${{inputs.client_name}}-${{inputs.environment}} || terraform workspace new ${{inputs.client_name}}-${{inputs.environment}}
           terraform plan
           terraform apply -auto-approve
-#          terraform apply -destroy -auto-approve
+
 
         working-directory: ./client
