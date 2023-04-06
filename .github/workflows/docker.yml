@@ -1,43 +1,45 @@
-name: Docker Image CD
-
+name: Create Clients
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
+  workflow_dispatch:
+    inputs:
+      client_name:
+        description: Enter Client Name
+        required: true
+        type: string
+      environment:
+        description: Select environment
+        type: choice
+        required: true
+        options:
+          - dev
+          - staging
+          - prod
+      destroy:
+        description: Destroy Environment
+        type: boolean
+        required: false
 jobs:
-  Deploy:
-   
+  deploy:
     runs-on: ubuntu-latest
-    environment: Deploy
+    environment: DEV
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.TF_USER_AWS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_USER_AWS_SECRET }}
+      AWS_DEFAULT_REGION: 'ap-southeast-1'
+      AWS_DEFAULT_OUTPUT: json
     steps:
-    - uses: actions/checkout@v3
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.TF_USER_AWS_KEY }}
-        aws-secret-access-key: ${{ secrets.TF_USER_AWS_SECRET }}
-        aws-region: us-east-1
-        
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-    - name: pull image from Amazon ECR
-      env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: githubactions
-          IMAGE_TAG: githubactions_image
-                
-    - uses: appleboy/ssh-action@master    
-    - name: Docker pull & run from github
-          uses
-      with:
-          host: ec2-100-26-191-30.compute-1.amazonaws.com
-          username: ec2-user
-          key: ${{ secrets.ACTIONS_PRIVATE_KEY }}
-          envs: GITHUB_SHA
-          script: |
-            docker login
-            docker pull $IMAGE_TAG
-#            docker run  $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      - uses: actions/checkout@v3
+      - name: Run Terraform
+        env:
+          TF_VAR_customer_name: ${{ inputs.client_name }}
+          TF_VAR_environment: ${{ inputs.environment }}
+        run: |
+          terraform --version
+          terraform init --upgrade
+          
+          terraform workspace select ${{inputs.client_name}}-${{inputs.environment}} || terraform workspace new ${{inputs.client_name}}-${{inputs.environment}}
+          terraform plan
+          terraform apply -auto-approve
+#          terraform apply -destroy -auto-approve
+
+        working-directory: ./client
