@@ -30,7 +30,7 @@ jobs:
           IMAGE_TAG: githubactions_image
                 
     - uses: appleboy/ssh-action@master    
-    - name: Docker pull & run from github
+      name: Docker pull & run from github
           uses
       with:
           host: ec2-44-202-140-5.compute-1.amazonaws.com
