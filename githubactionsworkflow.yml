@@ -1,0 +1,132 @@
+name: Frontend-deployment-dev
+
+on:
+  workflow_dispatch:
+  
+    inputs:
+      BUILD_VERSION:
+        description: 'Enter The BUILD_VERSION'
+        required: false
+        
+      CUSTOMER_NAME:
+         description: 'Select Customer Name'
+         type: choice
+         required: true
+         default: 'opsycon-dev'
+         options: 
+          - 'atimonan-staging'
+          - 'rbcavinti-prod'
+          - 'opsycon-dev'
+          
+  workflow_run:
+    workflows: ["frontend-build"]
+    types:
+      - completed
+  
+      #environment:
+       # description: Select environment
+       # type: choice
+       # options:
+        #  - dev
+         # - staging
+         # - prod
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  deploy:   
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:  
+      AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.ACCESS_SECRET }}
+      AWS_DEFAULT_REGION: 'ap-southeast-1'
+      AWS_DEFAULT_OUTPUT: json
+      CUSTOMER_NAME: ${{ github.event.inputs.CUSTOMER_NAME || 'opsycon-dev' }}
+      #CUSTOMER_NAME: 'opsycon-dev'
+      
+    steps:
+      - name: Use the manually provided info...
+        run: |
+          if [ -n "${{ github.event.inputs.BUILD_VERSION }}" ]; then
+            echo "BUILD_VERSION=${{ github.event.inputs.BUILD_VERSION }}" >> $GITHUB_ENV
+            echo $BUILD_VERSION
+          else
+            aws s3 cp  s3://cloudbank-build-artifacts/frontend-build-artifacts/lastBuild_frontend lastBuild_frontend
+            export BUILD_VERSION=`cat lastBuild_frontend`
+            echo "BUILD_VERSION=${BUILD_VERSION}" >> $GITHUB_ENV
+            echo $BUILD_VERSION
+          fi
+      - name: Set up environment
+        run: echo "Setting up the environment"
+        
+      - name: Check and retrieve BUILD_VERSION
+        if: ${{ github.event.inputs.CUSTOMER_NAME != 'atimonan-staging' }}
+        run: |
+          if [[ -z "${BUILD_VERSION}" ]]; then
+            echo "BUILD_VERSION not set. Exiting..."
+            exit 1
+          fi
+          env
+          echo ${BUILD_VERSION}
+          mkdir -p ${{ github.workspace }}/frontend-build-prod/
+          cd ${{ github.workspace }}/frontend-build-prod/
+          aws s3 cp s3://cloudbank-build-artifacts/frontend-build-artifacts/${BUILD_VERSION}.zip ${{ github.workspace }}/frontend-build-prod/
+          cd /tmp/
+          mkdir -p frontend-build-prod/
+          cd frontend-build-prod/
+          pwd
+          rm -rf *
+          cp ${{ github.workspace }}/frontend-build-prod/${BUILD_VERSION}.zip .
+          unzip ${BUILD_VERSION}.zip
+          rm ${BUILD_VERSION}.zip
+          cd dist/cloudbank-admin-ui/
+          echo "BUILD_VERSION: $BUILD_VERSION"
+          aws s3 cp s3://cloudbank-frontend-env/${{ env.CUSTOMER_NAME }}/${{ env.CUSTOMER_NAME }}.env ${{ env.CUSTOMER_NAME }}.env
+          CLI_URL=$(sed -n '1p' ${{ env.CUSTOMER_NAME }}.env | tr -d '\r')
+          BKT_NAME=$(sed -n '2p' ${{ env.CUSTOMER_NAME }}.env | tr -d '\r')
+          PROFILE=$(sed -n '4p' ${{ env.CUSTOMER_NAME }}.env | tr -d '\r')
+          CLOUDFRONT_ID=$(sed -n '3p' ${{ env.CUSTOMER_NAME }}.env | tr -d '\r')
+          export COGNITO=no
+          echo "CLI_URL: $CLI_URL" | tr -d '\r'
+          echo "BKT_NAME: $BKT_NAME" | tr -d '\r'
+          echo "PROFILE: $PROFILE" | tr -d '\r'
+          echo "CLOUDFRONT_ID: $CLOUDFRONT_ID" | tr -d '\r'
+          echo "COGNITO: $COGNITO"
+          if [[ COGNITO == "no" ]]; then 
+          sed -i 's,atimonan,'"${CLI_URL}"',g' main.*.js; 
+          sed -i 's,dev.opsycon,'"${CLI_URL}"',g' main.*.js
+          fi
+          if [[ ${{ env.CUSTOMER_NAME }} == "rang-ay-staging" ]]; then
+           echo "Adjusting the url"
+           API_STRING='api-staging'
+           sed -i 's,api-test,'"${API_STRING}"',g' main.*.js
+          fi
+          
+          rm -rf customer-env.env
+          ls -al
+          echo $BKT_NAME | tr -d '\r'
+          aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }} --profile ${PROFILE}
+          aws configure set aws_secret_access_key ${{ secrets.ACCESS_SECRET }} --profile ${PROFILE}
+          cat ~/.aws/credentials
+          aws s3 sync . s3://${BKT_NAME} --acl public-read --profile ${PROFILE}
+          aws s3 cp index.html s3://${BKT_NAME} --acl public-read --profile ${PROFILE}
+          
+          aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_ID} --profile ${PROFILE} --paths "/*"
+      - name: Check and retrieve BUILD_VERSION For atimonan-staging
+        if: ${{ github.event.inputs.CUSTOMER_NAME == 'atimonan-staging' }}
+        run: |
+          cd /tmp/
+          mkdir -p frontend-build-prod
+          cd frontend-build-prod
+          rm -rf *
+          aws s3 cp s3://cloudbank-build-artifacts/frontend-build-artifacts/${BUILD_VERSION}.zip .
+          unzip ${BUILD_VERSION}.zip
+
+          rm ${BUILD_VERSION}.zip
+          cd dist/cloudbank-admin-ui/
+          sed -i 's,dev.opsycon,staging.atimonan,g' main.*.js
+          aws s3 sync . s3://cloudbank-site --profile opsycon-root --acl public-read
+          aws cloudfront --profile opsycon-root create-invalidation --distribution-id E3BZW3FVSRD6LG --paths /
