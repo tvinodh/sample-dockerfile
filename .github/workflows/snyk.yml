@@ -1,0 +1,26 @@
+name: Snyk Security Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main  # Adjust to match your default branch
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: snyk/actions/setup@master
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Snyk monitor
+        run: |
+           snyk auth $SNYK_TOKEN
+           snyk test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
+     
