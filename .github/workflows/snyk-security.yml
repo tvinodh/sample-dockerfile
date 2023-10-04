@@ -1,14 +1,23 @@
-name: Example workflow for Node using Snyk
+name: Example workflow for Node and Docker using Snyk
 on: push
 jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: Run Snyk to check for vulnerabilities
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Snyk to check Node.js project for vulnerabilities
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
         with:
+          args: --severity-threshold=high
+
+      - name: Run Snyk to check Docker images for vulnerabilities
+        uses: snyk/actions/docker@master
+        continue-on-error: true
+        with:
+          image: your/image-to-test
           args: --severity-threshold=high
