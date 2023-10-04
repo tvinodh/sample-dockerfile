@@ -24,7 +24,7 @@ jobs:
           image: your/image-to-test
           args: --severity-threshold=high --sarif-file-output=snyk.sarif
       - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk.sarif
           
