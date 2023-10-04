@@ -1,8 +1,14 @@
 name: Example workflow for Node and Docker using Snyk
 on: push
+permissions:
+      contents: read
+      packages: write
 jobs:
   security:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
