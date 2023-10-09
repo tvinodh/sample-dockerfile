@@ -1,35 +1,20 @@
-name: Example workflow for Node and Docker using Snyk
-on: push
-permissions:
-      contents: read
-      packages: write
+name: snyk security scan
+
+on:
+  workflow_dispatch:
+  pull_request:
+
 jobs:
-  security:
+  Security:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run Snyk to check Node.js project for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: true
+      - uses: actions/checkout@master
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+      - name: Run Snyk to check for vulnerabilities  #package.json and JavaScript/Node.js files
+        run: |
+           npx snyk test --all-projects --severity-threshold=high, critical
+           npx snyk container test --severity-threshold=high, critical
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
-        with:
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif
-
-      - name: Run Snyk to check Docker images for vulnerabilities
-        uses: snyk/actions/docker@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
-        with:
-          image: your/image-to-test
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif
-      - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: snyk.sarif
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
