@@ -12,7 +12,6 @@ WORKDIR /app
 #   can use the source_dir app spec option, see: https://www.digitalocean.com/docs/app-platform/references/app-specification-reference/
 COPY . .
 RUN go build -mod=vendor -o bin/hello
-
 # -- Stage 2 -- #
 # Create the final environment with the compiled binary.
 FROM alpine
