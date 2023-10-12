@@ -58,7 +58,8 @@ jobs:
           #context: .
           #file: cicd/Dockerfile
           # Set the tag to "latest" initially and update it to the Git tag if available
-          tags: 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:latest
+          tags: 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:${{ env.DOCKER_TAG }}
+          
           
       - name: Update the Docker image tag in ECR based on Git tag
         if: ${{ github.event_name == 'push' && github.event.ref_type == 'tag' }}
