@@ -1,0 +1,69 @@
+name: sandbox_build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    tags:
+      - '*'
+
+env:
+  AWS_REGION: "ap-southeast-1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.TF_USER_AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.TF_USER_AWS_SECRET }}
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Package
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          rm -rf node_modules
+          nvm install 16
+          nvm use 16
+          npm i -g @angular/cli
+          npm install --save-dev @angular-devkit/build-angular
+          ng build --configuration production
+
+      - name: Set Docker tag based on branch or tag
+        id: set-docker-tag
+        run: |
+          # Extract the Git tag from GITHUB_REF if it's a tag, or use "latest" for non-tag pushes
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            DOCKER_TAG="${GITHUB_REF#refs/tags/}"
+          else
+            DOCKER_TAG="latest"
+          fi
+          echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
+
+      - name: Build and push Docker container with tag
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          context: .
+          file: cicd/Dockerfile
+          # Set the tag to "latest" initially and update it to the Git tag if available
+          tags: 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:latest
+          
+      - name: Update the Docker image tag in ECR based on Git tag
+        if: ${{ github.event_name == 'push' && github.event.ref_type == 'tag' }}
+        run: |
+          echo "Updating Docker image tag in ECR to $DOCKER_TAG"
+          aws ecr create-repository --repository-name ecs
+          aws ecr batch-check-layer-availability --repository-name admin-ui --image-manifest "{\"imageDigest\":\"$(docker inspect --format='{{index .RepoDigests 0}}' 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:latest | cut -d@ -f2)\"}"
+          aws ecr put-image --repository-name admin-ui --image-tag $DOCKER_TAG --image-manifest "{\"imageDigest\":\"$(docker inspect --format='{{index .RepoDigests 0}}' 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:latest | cut -d@ -f2)\"}"
