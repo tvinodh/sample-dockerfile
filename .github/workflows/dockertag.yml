@@ -55,8 +55,8 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          context: .
-          file: cicd/Dockerfile
+          #context: .
+          #file: cicd/Dockerfile
           # Set the tag to "latest" initially and update it to the Git tag if available
           tags: 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:latest
           
