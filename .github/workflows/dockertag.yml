@@ -36,9 +36,9 @@ jobs:
           rm -rf node_modules
           nvm install 16
           nvm use 16
-          npm i -g @angular/cli
-          npm install --save-dev @angular-devkit/build-angular
-          ng build --configuration production
+          #npm i -g @angular/cli
+          #npm install --save-dev @angular-devkit/build-angular
+          #ng build --configuration production
 
       - name: Set Docker tag based on branch or tag
         id: set-docker-tag
