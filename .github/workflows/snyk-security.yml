@@ -15,7 +15,7 @@ jobs:
       - name: Run Snyk to check for vulnerabilities  #package.json and JavaScript/Node.js files
         run: |
            npm install -g snyk
-           npx snyk test --all-projects src --severity-threshold=high --sarif=code-snyk.sarif
+           npx snyk test --all-projects --severity-threshold=high --sarif=code-snyk.sarif
            #npx snyk container test --severity-threshold=high, critical
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
