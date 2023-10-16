@@ -1,0 +1,96 @@
+name: Frontend-deployment-dev
+on:
+  workflow_dispatch:
+  
+    inputs:
+      CUSTOMER_NAME:
+        description: Enter Customer Name
+        required: false
+        type: string
+      environment:
+        description: Select environment
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  deploy:   
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    environment: stage
+
+    env:  
+      AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.ACCESS_SECRET }}
+      AWS_DEFAULT_REGION: 'ap-southeast-1'
+      AWS_DEFAULT_OUTPUT: json
+      
+    steps:
+      - name: Wait for 30 seconds
+        run: sleep 30
+      - name: Check and retrieve BUILD_VERSION
+        run: |
+          if [ -z "$BUILD_VERSION" ]; then
+            aws s3 cp s3://cloud-bank-frontend/ci-build/lastBuild_frontend lastBuild_frontend
+            #aws s3 cp  s3://cloudbank-build-artifacts/frontend-build-artifacts/lastBuild_frontend lastBuild_frontend
+            export BUILD_VERSION=`cat lastBuild_frontend`
+          fi
+          echo "BUILD_VERSION: $BUILD_VERSION"
+          env
+          echo ${BUILD_VERSION}
+          mkdir -p ${{ github.workspace }}/frontend-build-prod/
+          cd ${{ github.workspace }}/frontend-build-prod/
+          pwd
+          
+          aws s3 cp s3://cloud-bank-frontend/ci-build/${BUILD_VERSION}.zip ${{ github.workspace }}/frontend-build-prod/
+          #aws s3 cp s3://cloudbank-build-artifacts/frontend-build-artifacts/${BUILD_VERSION}.zip ${{ github.workspace }}/frontend-build-prod/
+          cd /tmp/
+          mkdir -p frontend-build-prod/
+          cd frontend-build-prod/
+          pwd
+          rm -rf *
+          cp ${{ github.workspace }}/frontend-build-prod/${BUILD_VERSION}.zip .
+          unzip ${BUILD_VERSION}.zip
+          ls -al
+          cd dist/cloudbank-admin-ui/
+          echo "BUILD_VERSION: $BUILD_VERSION"
+          aws s3 cp s3://cloudbank-frontend-env/${{ inputs.CUSTOMER_NAME }}/${{ inputs.CUSTOMER_NAME }}.env ${{ inputs.CUSTOMER_NAME }}.env
+          #aws s3 cp s3://cloud-bank-frontend/${{ inputs.CUSTOMER_NAME }}/${{ inputs.CUSTOMER_NAME }}.env ${{ inputs.CUSTOMER_NAME }}.env
+          CLI_URL=$(sed -n '1p' ${{ inputs.CUSTOMER_NAME }}.env | tr -d '\r')
+          BKT_NAME=$(sed -n '2p' ${{ inputs.CUSTOMER_NAME }}.env | tr -d '\r')
+          PROFILE=$(sed -n '4p' ${{ inputs.CUSTOMER_NAME }}.env | tr -d '\r')
+          CLOUDFRONT_ID=$(sed -n '3p' ${{ inputs.CUSTOMER_NAME }}.env | tr -d '\r')
+          export COGNITO=no
+          #echo "CLI_URL: $CLI_URL" | tr -d '\r'
+          #echo "BKT_NAME: $BKT_NAME" | tr -d '\r'
+          #echo "PROFILE: $PROFILE" | tr -d '\r'
+          #echo "CLOUDFRONT_ID: $CLOUDFRONT_ID" | tr -d '\r'
+          echo "COGNITO: $COGNITO"
+          if [[ COGNITO == "no" ]]; then 
+          sed -i 's,atimonan,'"${CLI_URL}"',g' main.*.js; 
+          sed -i 's,dev.opsycon,'"${CLI_URL}"',g' main.*.js
+          fi
+          
+          if [[ ${{ inputs.CUSTOMER_NAME }} == "rang-ay-staging" ]]; then
+           echo "Adjusting the url"
+           API_STRING='api-staging'
+           sed -i 's,api-test,'"${API_STRING}"',g' main.*.js
+          fi
+          rm -rf customer-env.env
+          ls -al
+          #aws s3 sync . s3://vinodh-frontend-cloudbank
+          echo $BKT_NAME | tr -d '\r'
+          aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }} --profile ${PROFILE}
+          aws configure set aws_secret_access_key ${{ secrets.ACCESS_SECRET }} --profile ${PROFILE}
+          cat ~/.aws/credentials
+          #aws s3 sync . s3://${BKT_NAME} --acl public-read --profile ${PROFILE}
+          #aws s3 cp index.html s3://${BKT_NAME} --acl public-read --profile ${PROFILE}
+          
+          #aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_ID} --profile ${PROFILE} --paths "/*"
+  
