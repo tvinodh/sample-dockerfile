@@ -10,8 +10,10 @@ jobs:
     permissions: write-all
     steps:
       - uses: actions/checkout@master
+      
       - name: Set up Node.js
         uses: actions/setup-node@v2
+        
       - name: Run Snyk to check for vulnerabilities  #package.json and JavaScript/Node.js files
         run: |
            npm install -g snyk
