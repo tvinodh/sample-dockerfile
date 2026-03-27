@@ -60,7 +60,6 @@ jobs:
           # Set the tag to "latest" initially and update it to the Git tag if available
           tags: 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:${{ env.DOCKER_TAG }}
           
-          
       - name: Update the Docker image tag in ECR based on Git tag
         if: ${{ github.event_name == 'push' && github.event.ref_type == 'tag' }}
         run: |
@@ -68,3 +67,4 @@ jobs:
           aws ecr create-repository --repository-name ecs
           aws ecr batch-check-layer-availability --repository-name admin-ui --image-manifest "{\"imageDigest\":\"$(docker inspect --format='{{index .RepoDigests 0}}' 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:latest | cut -d@ -f2)\"}"
           aws ecr put-image --repository-name admin-ui --image-tag $DOCKER_TAG --image-manifest "{\"imageDigest\":\"$(docker inspect --format='{{index .RepoDigests 0}}' 788866596473.dkr.ecr.us-east-1.amazonaws.com/ecs:latest | cut -d@ -f2)\"}"
+
